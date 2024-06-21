@@ -1,0 +1,57 @@
+output_columns:
+  - "specimen_date"
+  - "prediction_end_date"
+  - "model"
+  - "days_to_reported"
+  - ".sample"
+  - ".value"
+
+dates:
+  start_date: "2023-10-08"
+  tune_end_date: "2023-10-29"
+  evaluate_end_date: "2024-03-10"
+
+hyperparams:
+
+  gam:
+    model_path: "./scripts/run_models/functions/gam.R"
+    training_length: 56
+    max_delay: 14
+    denom_specimen: 7
+    denom_report: 7
+
+  bsts:
+    training_length: 60
+    level:
+      sigma.guess: 0.001
+      upper.limit: 0.09531018
+    slope:
+      sigma.guess: 0.001
+      upper.limit: 0.09531018
+    seasonality: 7
+    niter: 50000
+    horizon: 7
+    burnin: 2000
+
+  bsts_111:
+    training_length: 150
+    level:
+      sigma.guess: 0.001
+      upper.limit: 0.009950331
+    slope:
+      sigma.guess: 0.001
+      upper.limit: 0.09531018
+    seasonality: 7
+    niter: 50000
+    horizon: 7
+    burnin: 2000
+    model.size: 5
+
+  epinowcast:
+    model_path: "./scripts/run_models/functions/epinowcast.R"
+    training_length: 35
+    max_delay: 7
+    n_iterations: 1000
+    n_warmup: 1000
+    chains: 2
+    parallel_chains: 2
