@@ -1,6 +1,6 @@
 # Load data from each model and score / plot together
 
-# IMPORTANT: Gets prediction dataframes from S3, so must be uploaded to model_data_path
+# IMPORTANT: Gets prediction dataframes from model_data_path, so must be uploaded there
 
 #### SETUP ####
 
