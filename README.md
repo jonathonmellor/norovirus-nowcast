@@ -1,6 +1,10 @@
 # Norovirus Nowcast England 2023/24
 
-This is the repository for the code and data associated with the paper entitled: "An Application of Nowcasting Methods: Cases of Norovirus during the Winter 2023/2024 in England".
+This is the repository for the code and data associated with the paper entitled: ["An Application of Nowcasting Methods: Cases of Norovirus during the Winter 2023/2024 in England"](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1012849) now published in PLOS Computational Biology, https://doi.org/10.1371/journal.pcbi.1012849. 
+
+## Authors:
+
+Jonathon Mellor, Maria L. Tang, Emilie Finch, Rachel Christie, Oliver Polhill, Christopher E. Overton, Ann Hoban, Amy Douglas, Sarah R. Deeny, Thomas Ward.
 
 There are two key points to consider when exploring this repository:
 
