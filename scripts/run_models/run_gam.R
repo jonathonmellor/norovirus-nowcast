@@ -42,13 +42,9 @@ if (tuning) {
 #### LOAD DATA ####
 # # # # # # # # # #
 
-training_data <- aws.s3::s3read_using(
-  vroom::vroom,
-  object = training_data_path,
-  show_col_types = FALSE
-) |>
-  dplyr::mutate(specimen_date = lubridate::ymd(specimen_date)) |>
-  dplyr::select(-filename)
+
+
+training_data <- vroom::vroom(training_data_path)
 
 
 # # # # # # # # # # # # # # #
@@ -80,16 +76,15 @@ gam_formatted <- extract_from_list(gam_outputs)$quantile_predictions
 # # # # # # # # # # # # #
 
 data_output_path <- glue::glue("{output_path}/data")
-dir.create(data_output_path, recursive = TRUE)
+fs::dir_create(data_output_path)
 
 gam_formatted_scoring <- gam_formatted |>
   # score based on latest data
   dplyr::select(-target_value) |>
   dplyr::filter(!is.na(pi_50))
-write.csv(
+readr::write_csv(
   x = gam_formatted_scoring,
-  file = glue::glue("{data_output_path}/gam_predictions_summary.csv"),
-  row.names = FALSE)
+  file = glue::glue("{data_output_path}/gam_predictions_summary.csv"))
 
 
 # # # # # # # # # #
@@ -123,43 +118,5 @@ plot_nowcast(
 # # # # # # # # # #
 #### SCORING ####
 # # # # # # # # #
-message("Now scoring models")
 
-scoring_output_path <- fs::dir_create(fs::path(output_path, "scoring"))
-
-# full latest data by day and week
-latest_data <- training_data |>
-  dplyr::group_by(specimen_date) |>
-  dplyr::summarise(target_value = sum(target, na.rm = TRUE),
-    .groups = "drop")
-
-latest_data <- latest_data |>
-  dplyr::mutate(t_aggregation = "daily") |>
-  dplyr::bind_rows(latest_data |>
-    dplyr::mutate(
-      specimen_date = lubridate::floor_date(
-        specimen_date, unit = "week", week_start = 1)) |>
-    dplyr::group_by(specimen_date) |>
-    dplyr::summarise(target_value = sum(target_value, na.rm = TRUE),
-      .groups = "drop") |>
-    dplyr::mutate(t_aggregation = "weekly"))
-
-gam_formatted_scoring <- gam_formatted_scoring |>
-  dplyr::left_join(
-    latest_data,
-    by = c("specimen_date", "t_aggregation"))
-
-
-score(
-  data = gam_formatted_scoring |>
-    dplyr::filter(t_aggregation == "daily"),
-  add_log = FALSE,
-  output_path = scoring_output_path,
-  model_name = "gam")
-
-score(
-  data = gam_formatted_scoring |>
-    dplyr::filter(t_aggregation == "weekly"),
-  add_log = FALSE,
-  output_path = scoring_output_path,
-  model_name = "gam_weekly")
+# NOTE: scoring has been removed.

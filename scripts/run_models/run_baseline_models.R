@@ -34,12 +34,7 @@ if (tuning) {
 
 # Load Data ####
 
-training_data <- aws.s3::s3read_using(
-  vroom::vroom,
-  object = training_data_path,
-  show_col_types = FALSE
-) |>
-  dplyr::mutate(specimen_date = lubridate::ymd(specimen_date))
+training_data <- vroom::vroom(training_data_path)
 
 latest_data <- training_data |>
   dplyr::group_by(specimen_date) |>
@@ -198,8 +193,6 @@ previous_week_baseline <-
 
 # SAVE OUTPUTS ####
 
-dir.create(data_output_path, recursive = TRUE)
-write.csv(partial_baseline, glue::glue("{data_output_path}/baseline_partial_predictions_summary.csv"),
-  row.names = FALSE)
-write.csv(previous_week_baseline, glue::glue("{data_output_path}/baseline_prevweek_predictions_summary.csv"),
-  row.names = FALSE)
+fs::dir_create(data_output_path)
+# NOTE: not saving the partial baseline for this analysis.
+readr::write_csv(previous_week_baseline, glue::glue("{data_output_path}/baseline_prevweek_predictions_summary.csv"))
