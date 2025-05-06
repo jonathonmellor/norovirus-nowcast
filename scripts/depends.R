@@ -29,5 +29,3 @@ pacman::p_load(
   webshot
 )
 
-remotes::install_github("epinowcast/epinowcast", dependencies = TRUE, ref = "v0.2.2")
-library(epinowcast)
