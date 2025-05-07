@@ -100,7 +100,7 @@ trunc_rep_mat_list <- baselinenowcast::truncate_triangles(
 )
 
 retro_rep_tri_list <- baselinenowcast::generate_triangles(
-  trunc_rep_mat_list = trunc_rep_mat_list
+  reporting_triangle_list = trunc_rep_mat_list
 )
 
 # problem here?
@@ -113,9 +113,67 @@ disp_params <- baselinenowcast::estimate_dispersion(
   pt_nowcast_mat_list = retro_pt_nowcast_mat_list,
   trunc_rep_mat_list = trunc_rep_mat_list
 )
+n_for_delay_estimate <- min(
+  sapply(retro_rep_tri_list, nrow))
+for (i in 1:length(retro_rep_tri_list)) {
+  # Get number of rows in the retrospective reporting triangle 
+  nr0 <- nrow(retro_rep_tri_list[[i]])
+  
+  # For each reporting triangle, it will use the bottom `n_for_delay_estimate`
+  # rows in the current function defaults (which are not the same as the default 
+  # configuration, and should probably be considered more carefully).
+  # Therefore, we need to check that any of these triangles contain 0s in the bottom 16 rows. 
+  if (all(retro_rep_tri_list[[i]][(nr0-n_for_delay_estimate + 1):nr0,1] == 0)) print(i)
+  
+  # We see that 1, 2, 3, and 4 all contain the bottom 16 rows as NA. 
+}
+
+# Try again with `n_for_delay_estimate=28`-------------------------------------
+# Running again being specific about how many triangles to make based on 
+# specification of 56 as the total training data. 
+
+n_for_delay_estimate <- config$hyperparams$gam$training_length/2
+n_for_uncertainty_estimate <- config$hyperparams$gam$training_length - n_for_delay_estimate
+delay_pmf <- baselinenowcast::get_delay_estimate(
+  reporting_triangle = cleaned_reporting_triangle,
+  max_delay = config$hyperparams$gam$max_delay,
+  n = n_for_delay_estimate 
+)
+
+point_nowcast_matrix <- baselinenowcast::apply_delay(
+  rep_tri_to_nowcast = cleaned_reporting_triangle,
+  delay_pmf = delay_pmf
+)
+
+trunc_rep_mat_list <- baselinenowcast::truncate_triangles(
+  reporting_triangle = cleaned_reporting_triangle,
+  n = n_for_uncertainty_estimate # This n is the number of triangles to make, not the number
+  # to use for delay estimation, though they happen to be the same 
+)
+
+retro_rep_tri_list <- baselinenowcast::generate_triangles(
+  reporting_triangle_list = trunc_rep_mat_list
+)
+# Generate 28 retrospective reporting triangles, of which the delay is estimated
+# from the last 28 rows of data. Since n
+retro_pt_nowcast_mat_list <- baselinenowcast::generate_pt_nowcast_mat_list(
+  reporting_triangle_list = retro_rep_tri_list
+)
 
 for (i in 1:length(retro_rep_tri_list)) {
-
-  if (all(retro_rep_tri_list[[i]][,1] == 0)) print(i)
-
+  # Get number of rows in the retrospective reporting triangle 
+  nr0 <- nrow(retro_rep_tri_list[[i]])
+  
+  # For each reporting triangle, it will use the bottom `n_for_delay_estimate`
+  # Therefore, we need to check that any of these triangles contain 0s in the bottom 28 rows. 
+  if (all(retro_rep_tri_list[[i]][(nr0-n_for_delay_estimate + 1):nr0,1] == 0)) print(i)
+  
 }
+# No zeros in bottom 28 rows of any of the retrospective reporting triangles,
+# therefore we can generate the retrospective point nowcasts 
+
+disp_params <- baselinenowcast::estimate_dispersion(
+  pt_nowcast_mat_list = retro_pt_nowcast_mat_list,
+  trunc_rep_mat_list = trunc_rep_mat_list
+)
+
