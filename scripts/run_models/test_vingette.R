@@ -1,92 +1,39 @@
-# script to develop implimentation of `baselinenowcast` model on norovirus case
-# study data.
-
-# # # # # # # # # # # #
-####    SETUP     ####
-# # # # # # # # # # # #
-
-wd <- system("echo $(git rev-parse --show-toplevel)/", intern = TRUE)
-source("./scripts/depends.R")
-source("./scripts/run_models/functions/model_running_functions.R")
-source(paste0(wd, "/scripts/run_models/functions/plotting.R"))
-source(paste0(wd, "/scripts/run_models/functions/scoring.R"))
-
-# we want to use the most recent versions of the packages on GitHub
-remotes::install_github(repo = "epinowcast/baselinenowcast")
-remotes::install_github(repo = "epinowcast/epinowcast")
-
+# nolint start
+# Installing epinowcast
+# install.packages(
+#  "epinowcast", repos = "https://epinowcast.r-universe.dev"
+# ) #nolint
+# nolint end
+# Load packages
+library(baselinenowcast)
+library(epinowcast)
 library(ggplot2)
+library(dplyr)
+library(tidyr)
+# Set seed for reproducibility
+set.seed(123)
 
 
-# SET GLOBAL SEED for reproducibility
-set.seed(8675309)
+nowcast_date <- "2021-08-01"
+eval_date <- "2021-10-01"
 
 
-# # # # # # # # # # # #
-#### CONFIGURATION ####
-# # # # # # # # # # # #
-
-config <- yaml::read_yaml("./scripts/run_models/norovirus_nowcast_config.yaml")
-
-# depending on if tuning or not, set dates later
-tuning <- FALSE
-
-training_data_path <- "./outputs/data/cases_with_noise.csv"
-output_path <- "./outputs"
-
-if (tuning) {
-  max_reporting_dates <- seq(from = as.Date(config$dates$start_date),
-                             to = as.Date(config$dates$tune_end_date),
-                             by = 7)
-} else {
-  max_reporting_dates <- seq(from = as.Date(config$dates$start_date),
-                             to = as.Date(config$dates$evaluate_end_date),
-                             by = 7)
-}
-
-
-# # # # # # # # # #
-#### LOAD DATA ####
-# # # # # # # # # #
-
-
-
-training_data_raw <- vroom::vroom(training_data_path) |>
-  # convert to epinowcast naming conventions
-  dplyr::rename(reference_date = specimen_date,
-                confirm = target) |>
-  dplyr::mutate(report_date = reference_date + days_to_reported) |>
-  dplyr::select(-days_to_reported) |>
-  # adding this to try handle the problem calculating pobs
-  dplyr::filter(!is.na(confirm))
-
-
-
-# Run model
-
-# Approach: transform synthetic data to format needed for package and run getting
-# started page code in order.
-
-# select a test date to get the code working in line with the package getting started page
-nowcast_date <- max_reporting_dates[[1]]
-
-# apply required filtering
-target_data <- training_data_raw |>
-  dplyr::rename(new_confirm = confirm) |>
-  epinowcast::enw_filter_report_dates(latest_date = nowcast_date + 30) |>
-  epinowcast::enw_filter_reference_dates(
+target_data <- germany_covid19_hosp[location == "DE"][age_group == "00+"] |>
+  enw_filter_report_dates(latest_date = eval_date) |>
+  enw_filter_reference_dates(
     latest_date = nowcast_date
-  ) |>
-  epinowcast::enw_add_cumulative()
+  )
 
-latest_data <- epinowcast::enw_latest_data(target_data)
+latest_data <- enw_latest_data(target_data)
 
-observed_data <- epinowcast::enw_filter_report_dates(
+observed_data <- enw_filter_report_dates(
   target_data,
   latest_date = nowcast_date
 )
 
-obs_data_by_reference_date <- epinowcast::enw_latest_data(observed_data)
+head(observed_data)
+
+obs_data_by_reference_date <- enw_latest_data(observed_data)
 
 ggplot() +
   geom_line(
@@ -100,43 +47,40 @@ ggplot() +
   theme_bw() +
   xlab("Reference date") +
   ylab("Confirmed admissions") +
-  #scale_y_continuous(trans = "log10") +
+  scale_y_continuous(trans = "log10") +
   ggtitle("Comparing real-time and later observed cases")
 
 # Specify the maximum delay, which will determine the length of your delay
 # distribution. Empirical data outside this delay window will not be used for
 # training.
-max_delay <- config$hyperparams$gam$max_delay
-n_training_volume <- config$hyperparams$gam$training_length
+max_delay <- 30
+n_training_volume <- 3 * max_delay
 
 # Specify the number of reference times to use to estimate the delay
 # distribution. Note this assumes you want the most recent observations.
-# NOTE: check which to chose for this??
 n_history_delay <- 0.5 * n_training_volume
 
 # Specify the number of retrospective nowcast datasets
 # to use for uncertainty estimation.
-# NOTE: check which to chose for this??
 n_retrospective_nowcasts <- 0.5 * n_training_volume
 
-training_data <- epinowcast::enw_filter_reference_dates(
+training_data <- enw_filter_reference_dates(
   observed_data,
   include_days = n_training_volume - 1
 )
 
-latest_training_data <- epinowcast::enw_latest_data(training_data)
+latest_training_data <- enw_latest_data(training_data)
 
-target_data <- epinowcast::enw_filter_reference_dates(
+target_data <- enw_filter_reference_dates(
   latest_data,
   include_days = n_training_volume - 1
 )
-
 
 # Get the reporting triangle, adding an additional day because epinowcast
 # we want the max_delay + 1 entries since 0 is a valid delay.
 # This also validates that the data is in the correct format and
 # runs preprocessing see ?enw_preprocess_data for more details
-pobs <- epinowcast::enw_preprocess_data(
+pobs <- enw_preprocess_data(
   obs = training_data,
   max_delay = max_delay + 1
 )
@@ -157,6 +101,7 @@ reporting_triangle <- reporting_triangle_df |>
   pivot_wider(names_from = delay, values_from = new_confirm) |>
   select(-reference_date) |>
   as.matrix()
+
 
 triangle_df <- as.data.frame(reporting_triangle) |>
   mutate(time = row_number()) |>
@@ -196,7 +141,7 @@ ggplot(delay_df) +
   theme_bw()
 
 ggplot(delay_df) +
-  geom_point(aes(x = delay, y = pmf)) +
+  geom_line(aes(x = delay, y = pmf)) +
   xlab("Delay") +
   ylab("Proportion reported") +
   ggtitle("Empirical point estimate of proportion reported by delay") +
@@ -243,7 +188,6 @@ ggplot(plot_data, aes(x = reference_date, y = count, color = type)) +
   ggtitle("Comparing real-time, nowcasted, and later observed cases") +
   theme(legend.position = "bottom") +
   labs(color = "Type")
-
 
 trunc_rep_tri_list <- truncate_triangles(reporting_triangle,
                                          n = n_retrospective_nowcasts
@@ -339,6 +283,6 @@ ggplot() +
   ) +
   scale_y_continuous(trans = "log10") +
   xlab("Reference date") +
-  ylab("cases") +
+  ylab("Hospital admissions") +
   theme(legend.position = "bottom") +
-  ggtitle("Comparison of cases as of the nowcast date, later observed counts, \n and probabilistic nowcasted counts") # nolint
+  ggtitle("Comparison of admissions as of the nowcast date, later observed counts, \n and probabilistic nowcasted counts") # nolint
