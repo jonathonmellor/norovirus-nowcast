@@ -103,19 +103,3 @@ plot_nowcast(
   y_limit = 150,
   x_limit_upper = NA,
   x_limit_lower = "2023-10-02")
-
-final_observed <- training_data_raw |>
-  dplyr::summarise(target = sum(new_confirm, na.rm=TRUE),
-                   .by="reference_date")
-
-baselinenowcast_results |>
-  dplyr::filter(specimen_date > prediction_end_date - 7) |>
-  dplyr::select(-target) |>
-  dplyr::right_join(final_observed, by=c("specimen_date" = "reference_date")) |>
-  dplyr::mutate(prediction_end_date = factor(prediction_end_date)) |>
-  dplyr::filter(specimen_date > min(max_reporting_dates) - 14) |>
-  ggplot() +
-  geom_point(aes(x=specimen_date, y=target)) +
-  geom_line(aes(x=specimen_date, y=pi_50, group=prediction_end_date, color=prediction_end_date)) +
-  geom_ribbon(aes(x=specimen_date,ymax=pi_95, ymin=pi_5, group=prediction_end_date, fill=prediction_end_date), alpha=0.5) +
-  coord_cartesian(ylim=c(0,125))
