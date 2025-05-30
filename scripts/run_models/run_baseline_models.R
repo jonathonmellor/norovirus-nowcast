@@ -16,7 +16,7 @@ config <- yaml::read_yaml("./scripts/run_models/norovirus_nowcast_config.yaml")
 # depending on if tuning or not, set dates later
 tuning <- FALSE
 
-combined_path <- "./outputs/data/cases_with_noise.csv"
+training_data_path <- "./outputs/data/cases_with_noise.csv"
 
 output_path <- "./outputs"
 data_output_path <- glue::glue("{output_path}/data")

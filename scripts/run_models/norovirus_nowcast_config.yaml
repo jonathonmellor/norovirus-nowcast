@@ -20,6 +20,14 @@ hyperparams:
     denom_specimen: 7
     denom_report: 7
 
+  baselinenowcast:
+    model_path: "./scripts/run_models/functions/baselinenowcast.R"
+    training_length: 56
+    max_delay: 14
+    n_history_delay: 28
+    n_retrospective_nowcasts: 28
+
+
   bsts:
     training_length: 60
     level:

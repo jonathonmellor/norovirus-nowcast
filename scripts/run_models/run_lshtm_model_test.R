@@ -177,7 +177,7 @@ ggplot(
   theme_bw() +
   scale_y_reverse()
 
-delay_pmf <- get_delay_estimate(
+delay_pmf <- baselinenowcast::get_delay_estimate(
   reporting_triangle = reporting_triangle,
   max_delay = max_delay,
   n = n_history_delay
@@ -202,7 +202,7 @@ ggplot(delay_df) +
   ggtitle("Empirical point estimate of proportion reported by delay") +
   theme_bw()
 
-point_nowcast_matrix <- apply_delay(
+point_nowcast_matrix <- baselinenowcast::apply_delay(
   rep_tri_to_nowcast = reporting_triangle,
   delay_pmf = delay_pmf
 )
@@ -245,24 +245,24 @@ ggplot(plot_data, aes(x = reference_date, y = count, color = type)) +
   labs(color = "Type")
 
 
-trunc_rep_tri_list <- truncate_triangles(reporting_triangle,
+trunc_rep_tri_list <- baselinenowcast::truncate_triangles(reporting_triangle,
                                          n = n_retrospective_nowcasts
 )
-retro_rep_tri_list <- generate_triangles(trunc_rep_tri_list)
+retro_rep_tri_list <- baselinenowcast::generate_triangles(trunc_rep_tri_list)
 
-retro_pt_nowcast_mat_list <- generate_pt_nowcast_mat_list(
+retro_pt_nowcast_mat_list <- baselinenowcast::generate_pt_nowcast_mat_list(
   reporting_triangle_list = retro_rep_tri_list,
   n = n_history_delay
 )
 
-disp_params <- estimate_dispersion(
+disp_params <- baselinenowcast::estimate_dispersion(
   pt_nowcast_mat_list = retro_pt_nowcast_mat_list,
   trunc_rep_tri_list = trunc_rep_tri_list,
   reporting_triangle_list = retro_rep_tri_list,
   n = n_retrospective_nowcasts
 )
 
-nowcast_draws_df <- get_nowcast_draws(
+nowcast_draws_df <- baselinenowcast::get_nowcast_draws(
   point_nowcast_matrix, reporting_triangle,
   dispersion = disp_params,
   draws = 100
