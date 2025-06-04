@@ -3,7 +3,7 @@ run_baselinenowcast <- function(.data,
                                 prediction_end_date,
                                 n_pi_samples = 500,
                                 model_hyperparams,
-                                timestep = "day"
+                                timestep = "day",
                                 ...) {
 
   # parameters
