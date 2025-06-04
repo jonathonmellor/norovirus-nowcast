@@ -3,6 +3,7 @@ run_baselinenowcast <- function(.data,
                                 prediction_end_date,
                                 n_pi_samples = 500,
                                 model_hyperparams,
+                                timestep = "day"
                                 ...) {
 
   # parameters
@@ -45,7 +46,8 @@ run_baselinenowcast <- function(.data,
 
   pobs <- epinowcast::enw_preprocess_data(
     obs = training_data,
-    max_delay = max_delay + 1
+    max_delay = max_delay + 1,
+    timestep = timestep
   )
 
   reporting_triangle <- dplyr::select(
