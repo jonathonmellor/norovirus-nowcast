@@ -112,7 +112,7 @@ run_baselinenowcast <- function(.data,
     remove_identifiers = c()) |>
     dplyr::mutate(
       dplyr::across(
-        dplyr::starts_with("pi_"), ~ .x + target # This is meant to be observed data + nowcast, but we do that internally in the get_nowcast_draws fucntion
+        dplyr::starts_with("pi_"), ~ .x # This is meant to be observed data + nowcast, but we do that internally in the get_nowcast_draws fucntion
       )
     )|>
     dplyr::mutate(t_aggregation = "daily",
