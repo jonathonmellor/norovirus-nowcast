@@ -26,6 +26,7 @@ hyperparams:
     max_delay: 14
     n_history_delay: 28
     n_retrospective_nowcasts: 28
+    eval_timeframe: 50
 
 
   bsts:
