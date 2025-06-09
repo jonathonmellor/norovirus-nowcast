@@ -12,7 +12,6 @@ run_baselinenowcast <- function(.data,
   n_history_delay <- model_hyperparams$n_history_delay
   n_retrospective_nowcasts <- model_hyperparams$n_retrospective_nowcasts
   eval_timeframe <- model_hyperparams$eval_timeframe
-  eval_timeframe <- 50
   
   # Ignoring the vignette and epinowcast preprocessing for the most part
   training_data <- .data |>
@@ -110,11 +109,13 @@ run_baselinenowcast <- function(.data,
   nowcast_quantiles <- samples_to_quantiles(
     .sample_predictions = obs_with_nowcast_draws_df,
     remove_identifiers = c()) |>
-    dplyr::mutate(
-      dplyr::across(
-        dplyr::starts_with("pi_"), ~ .x # This is meant to be observed data + nowcast, but we do that internally in the get_nowcast_draws fucntion
-      )
-    )|>
+    # Remove this step because observations + predicted nowcast draws already
+    # happened in `get_nowcast_draws()`
+    # dplyr::mutate(
+    #   dplyr::across(
+    #     dplyr::starts_with("pi_"), ~ .x + target
+    #   )
+    # )|>
     dplyr::mutate(t_aggregation = "daily",
                   prediction_end_date = prediction_end_date,
                   model = "baselinenowcast")
