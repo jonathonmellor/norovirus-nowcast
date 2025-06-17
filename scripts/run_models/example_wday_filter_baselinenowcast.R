@@ -82,7 +82,8 @@ for( i in 1:7){
   )
  
  retro_rts <- generate_triangles(
-   trunc_rep_tri_list = trunc_rts
+   trunc_rep_tri_list = trunc_rts,
+   structure = c(1, 7)
  )
  # This is going to throw a bunch of warnings because only the first 15 
  # triangles are actually nowcastable. It will use those 15. 
