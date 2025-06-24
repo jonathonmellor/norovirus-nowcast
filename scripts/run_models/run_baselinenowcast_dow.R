@@ -57,7 +57,8 @@ training_data <- vroom::vroom(training_data_path)
 
 
 # Specifications
-nowcast_date <- "2024-01-21"
+# TODO issues fitting first two weeks
+nowcast_date <- max_reporting_dates[2]
 
 test_results <- run_baselinenowcast_dow(.data = training_data,
                                     prediction_end_date = nowcast_date,
