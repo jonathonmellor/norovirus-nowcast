@@ -77,3 +77,27 @@ test_results |>
   xlab("Specimen date") +
   ylab("cases") +
   theme(legend.position = "bottom")
+
+# fit all dates
+
+baselinenowcast_dow_results <- run_scripted_model(wd = wd,
+                                              model_name = "baselinenowcast_dow",
+                                              training_data = training_data,
+                                              prediction_end_dates = max_reporting_dates,
+                                              model_formula = "",
+                                              output_columns = config$output_columns,
+                                              model_hyperparams = config$hyperparams$baselinenowcast_dow,
+                                              n_pi_samples = 1000) |>
+  purrr::list_rbind()
+
+plotting_output_path <- fs::dir_create(fs::path(output_path, "plots"))
+
+plot_nowcast(
+  data = baselinenowcast_dow_results,
+  training_data = training_data,
+  model_name = "baselinenowcast_dow",
+  plot_type = "lookbacks",
+  output_path = plotting_output_path,
+  y_limit = 150,
+  x_limit_upper = NA,
+  x_limit_lower = "2023-10-02")
