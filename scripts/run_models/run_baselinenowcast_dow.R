@@ -58,7 +58,7 @@ training_data <- vroom::vroom(training_data_path)
 
 # Specifications
 # TODO issues fitting first two weeks
-nowcast_date <- max_reporting_dates[2]
+nowcast_date <- max_reporting_dates[3]
 
 test_results <- run_baselinenowcast_dow(.data = training_data,
                                     prediction_end_date = nowcast_date,
@@ -84,7 +84,8 @@ test_results |>
 baselinenowcast_dow_results <- run_scripted_model(wd = wd,
                                               model_name = "baselinenowcast_dow",
                                               training_data = training_data,
-                                              prediction_end_dates = max_reporting_dates,
+                                              # TODO issues fitting first two weeks
+                                              prediction_end_dates = max_reporting_dates[3:23],
                                               model_formula = "",
                                               output_columns = config$output_columns,
                                               model_hyperparams = config$hyperparams$baselinenowcast_dow,
