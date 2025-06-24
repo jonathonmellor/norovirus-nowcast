@@ -87,7 +87,7 @@ run_baselinenowcast_dow <- function(.data,
       point_nowcast_matrix = pt_nowcast_mat,
       reporting_triangle = rep_tri,
       dispersion = disp_params,
-      draws = n_draws
+      draws = n_pi_samples
     )
 
 
