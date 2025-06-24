@@ -10,7 +10,7 @@ source("./scripts/depends.R")
 source("./scripts/run_models/functions/model_running_functions.R")
 source(paste0(wd, "/scripts/run_models/functions/plotting.R"))
 source(paste0(wd, "/scripts/run_models/functions/scoring.R"))
-source(paste0(wd, "/scripts/run_models/functions/baselinenowcast.R"))
+source(paste0(wd, "/scripts/run_models/functions/baselinenowcast_dow.R"))
 
 
 # we want to use the most recent versions of the packages on GitHub
