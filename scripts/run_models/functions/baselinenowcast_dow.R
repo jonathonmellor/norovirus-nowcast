@@ -115,29 +115,12 @@ run_baselinenowcast_dow <- function(.data,
     # TODO only need last 14 days - do I need to change the fitting for this?
     filter(reference_date >= as.Date(prediction_end_date) - days(14))
 
-  target_data_summarised <- .data |>
-    rename(
-      reference_date = specimen_date
-    ) |>
-    mutate(
-      report_date = reference_date + days_to_reported
-    ) |>
-    epinowcast::enw_filter_report_dates(
-      latest_date = as.Date(prediction_end_date) + days(eval_timeframe)
-    ) |>
-    group_by(reference_date)|>
-    summarise(target = sum(target, na.rm = TRUE)) |># This is the actual target
-    filter(reference_date <= prediction_end_date) |>
-    arrange(reference_date,'desc') |>
-    mutate(reference_date = as.Date(reference_date))
-
-
   obs_with_nowcast_draws_df <- all_nowcasts |>
-    dplyr::left_join(target_data_summarised, by = "reference_date") |>
     dplyr::rename(.value = pred_count,
                   specimen_date = reference_date,
-                  .sample = draw) |>
-    dplyr::select(specimen_date, .sample, target, .value, data_as_of) |>
+                  .sample = draw,
+                  target = data_as_of) |>
+    dplyr::select(specimen_date, .sample, target, .value) |>
     dplyr::mutate(model = "baselinenowcast_dow")
 
   nowcast_quantiles <- samples_to_quantiles(
