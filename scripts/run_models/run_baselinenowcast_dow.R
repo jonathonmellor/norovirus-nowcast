@@ -1,3 +1,6 @@
+# script to develop implementation of day-of-week version of
+# `baselinenowcast` model on norovirus case study data.
+
 # # # # # # # # # # # #
 ####    SETUP     ####
 # # # # # # # # # # # #
@@ -21,9 +24,22 @@ library(dplyr)
 library(lubridate)
 library(glue)
 
+# SET GLOBAL SEED for reproducibility
+set.seed(8675309)
 
+# # # # # # # # # # # #
+#### CONFIGURATION ####
+# # # # # # # # # # # #
+
+config <- yaml::read_yaml("./scripts/run_models/norovirus_nowcast_config.yaml")
 
 training_data_path <- "./outputs/data/cases_with_noise.csv"
+output_path <- "./outputs"
+
+# # # # # # # # # #
+#### LOAD DATA ####
+# # # # # # # # # #
+
 training_data_raw <- vroom::vroom(training_data_path)
 
 training_data <- training_data_raw |>
