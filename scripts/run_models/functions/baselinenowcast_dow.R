@@ -59,8 +59,7 @@ run_baselinenowcast_dow <- function(.data,
       delay_pmf = delay_pmf
     )
 
-    # This will throw a warning because not all triangles can be nowcasted, in
-    # practince n_retrospective_nowcasts will be less than 28
+    # This will throw a warning because not all triangles can be nowcasted
     trunc_rts <- baselinenowcast::truncate_triangles(
       reporting_triangle = rep_tri,
       n = n_retrospective_nowcasts
