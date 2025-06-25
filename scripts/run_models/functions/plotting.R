@@ -138,7 +138,7 @@ plot_nowcast <- function( # nolint: cyclocomp_linter.
         ggnewscale::new_scale_color()
     }
 
-    for (partial_data_model in c("GAM", "epinowcast", "baselinenowcast_dow")) {
+    for (partial_data_model in c("GAM", "epinowcast", "baselinenowcast_model2", "baselinenowcast_model3")) {
       if (partial_data_model %in% data$model) {
         # plot partial data
         partial_data <- partial_data |>
