@@ -8,8 +8,6 @@ run_baselinenowcast_dow <- function(.data,
 
   # parameters
   max_delay <- model_hyperparams$max_delay
-  n_training_volume <- model_hyperparams$training_length
-
   n_history_delay <- model_hyperparams$n_history_delay
   n_retrospective_nowcasts <- model_hyperparams$n_retrospective_nowcasts
 
