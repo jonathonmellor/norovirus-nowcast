@@ -39,35 +39,14 @@ max_reporting_dates <- seq(from = as.Date(config$dates$tune_end_date) + lubridat
 
 training_data <- vroom::vroom(training_data_path)
 
-
-# Specifications
-nowcast_date <- max_reporting_dates[3]
-
-test_results <- run_baselinenowcast_dow(.data = training_data,
-                                    prediction_end_date = nowcast_date,
-                                    n_pi_samples = 100,
-                                    model_hyperparams = config$hyperparams$baselinenowcast_dow)
-test_results
-
-test_results |>
-  ggplot() +
-  geom_point(aes(x=specimen_date, y=target)) +
-  geom_ribbon(aes(x=specimen_date, ymax=pi_95, ymin=pi_5, alpha="90%")) +
-  geom_ribbon(aes(x=specimen_date, ymax=pi_75, ymin=pi_25, alpha="50%")) +
-  scale_alpha_manual(values = c("90%"=0.3,
-                                "50%" = 0.5)) +
-  scale_y_continuous(trans = "sqrt") +
-  xlab("Specimen date") +
-  ylab("cases") +
-  theme(legend.position = "bottom")
-
-# fit all dates
+# # # # # # # # # #
+#### FIT MODEL ####
+# # # # # # # # # #
 
 baselinenowcast_dow_results <- run_scripted_model(wd = wd,
                                               model_name = "baselinenowcast_dow",
                                               training_data = training_data,
-                                              # TODO issues fitting first two weeks
-                                              prediction_end_dates = max_reporting_dates[3:23],
+                                              prediction_end_dates = max_reporting_dates,
                                               model_formula = "",
                                               output_columns = config$output_columns,
                                               model_hyperparams = config$hyperparams$baselinenowcast_dow,
