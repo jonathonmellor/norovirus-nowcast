@@ -108,8 +108,6 @@ run_baselinenowcast_dow <- function(.data,
 
   }
 
-
-
   # Order by reference dates
   all_nowcasts <- all_nowcasts |>
     dplyr::arrange(reference_date, "desc") |>
@@ -122,9 +120,6 @@ run_baselinenowcast_dow <- function(.data,
     ) |>
     dplyr::mutate(
       report_date = reference_date + days_to_reported
-    ) |>
-    epinowcast::enw_filter_report_dates(
-      latest_date = as.Date(prediction_end_date) + days(eval_timeframe)
     ) |>
     dplyr::group_by(reference_date)|>
     dplyr::summarise(target = sum(target, na.rm = TRUE)) |># This is the actual target
