@@ -17,8 +17,6 @@ source(paste0(wd, "/scripts/run_models/functions/baselinenowcast_dow.R"))
 remotes::install_github(repo = "epinowcast/baselinenowcast")
 remotes::install_github(repo = "epinowcast/epinowcast")
 
-library(ggplot2)
-
 # SET GLOBAL SEED for reproducibility
 set.seed(8675309)
 
@@ -27,22 +25,13 @@ set.seed(8675309)
 # # # # # # # # # # # #
 
 config <- yaml::read_yaml("./scripts/run_models/norovirus_nowcast_config.yaml")
-# depending on if tuning or not, set dates later
-tuning <- FALSE
-
 training_data_path <- "./outputs/data/cases_with_noise.csv"
 output_path <- "./outputs"
 
-
-if (tuning) {
-  max_reporting_dates <- seq(from = as.Date(config$dates$start_date),
-                             to = as.Date(config$dates$tune_end_date),
-                             by = 7)
-} else {
-  max_reporting_dates <- seq(from = as.Date(config$dates$start_date),
+# will only use evaluation dates
+max_reporting_dates <- seq(from = as.Date(config$dates$tune_end_date) + lubridate::days(7),
                              to = as.Date(config$dates$evaluate_end_date),
                              by = 7)
-}
 
 # # # # # # # # # #
 #### LOAD DATA ####
@@ -52,7 +41,6 @@ training_data <- vroom::vroom(training_data_path)
 
 
 # Specifications
-# TODO issues fitting first two weeks
 nowcast_date <- max_reporting_dates[3]
 
 test_results <- run_baselinenowcast_dow(.data = training_data,
@@ -64,8 +52,6 @@ test_results
 test_results |>
   ggplot() +
   geom_point(aes(x=specimen_date, y=target)) +
-  geom_point(aes(x=specimen_date, y=data_as_of), color = "purple") +
-  geom_line(aes(x=specimen_date, y=data_as_of), color = "purple") +
   geom_ribbon(aes(x=specimen_date, ymax=pi_95, ymin=pi_5, alpha="90%")) +
   geom_ribbon(aes(x=specimen_date, ymax=pi_75, ymin=pi_25, alpha="50%")) +
   scale_alpha_manual(values = c("90%"=0.3,
