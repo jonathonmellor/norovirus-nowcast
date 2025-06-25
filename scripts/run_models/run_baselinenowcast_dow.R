@@ -64,6 +64,8 @@ test_results
 test_results |>
   ggplot() +
   geom_point(aes(x=specimen_date, y=target)) +
+  geom_point(aes(x=specimen_date, y=data_as_of), color = "purple") +
+  geom_line(aes(x=specimen_date, y=data_as_of), color = "purple") +
   geom_ribbon(aes(x=specimen_date, ymax=pi_95, ymin=pi_5, alpha="90%")) +
   geom_ribbon(aes(x=specimen_date, ymax=pi_75, ymin=pi_25, alpha="50%")) +
   scale_alpha_manual(values = c("90%"=0.3,

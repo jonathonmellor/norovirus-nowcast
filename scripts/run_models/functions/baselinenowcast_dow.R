@@ -28,7 +28,7 @@ run_baselinenowcast_dow <- function(.data,
     # apply filters to simulate real-time truncation
     train_df_i <- epinowcast::enw_filter_report_dates(
       # filter to one dow
-      obs = target_data[wday(target_data$reference_date) == i,],
+      obs = target_data[lubridate::wday(target_data$reference_date) == i,],
       latest_date = prediction_end_date
     ) |>
       epinowcast::enw_filter_reference_dates(
@@ -118,13 +118,28 @@ run_baselinenowcast_dow <- function(.data,
     # TODO only need last 14 days - do I need to change the fitting for this?
     dplyr::filter(reference_date >= as.Date(prediction_end_date) - days(14))
 
+  target_data_summarised <- .data |>
+    rename(
+      reference_date = specimen_date
+    ) |>
+    mutate(
+      report_date = reference_date + days_to_reported
+    ) |>
+    epinowcast::enw_filter_report_dates(
+      latest_date = as.Date(prediction_end_date) + days(eval_timeframe)
+    ) |>
+    group_by(reference_date)|>
+    summarise(target = sum(target, na.rm = TRUE)) |># This is the actual target
+    filter(reference_date <= prediction_end_date) |>
+    arrange(reference_date,'desc') |>
+    mutate(reference_date = as.Date(reference_date))
+
   obs_with_nowcast_draws_df <- all_nowcasts |>
+    dplyr::left_join(target_data_summarised, by = "reference_date") |>
     dplyr::rename(.value = pred_count,
                   specimen_date = reference_date,
-                  .sample = draw,
-                  # "target" here is actually partial data for consistency across model outputs
-                  target = data_as_of) |>
-    dplyr::select(specimen_date, .sample, target, .value) |>
+                  .sample = draw) |>
+    dplyr::select(specimen_date, .sample, target, .value, data_as_of) |>
     dplyr::mutate(model = "baselinenowcast_dow")
 
   nowcast_quantiles <- samples_to_quantiles(
