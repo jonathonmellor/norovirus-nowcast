@@ -27,11 +27,17 @@ hyperparams:
     n_history_delay: 28
     n_retrospective_nowcasts: 28
 
-  baselinenowcast_dow:
+  baselinenowcast_model2:
     model_path: "./scripts/run_models/functions/baselinenowcast_dow.R"
     max_delay: 14
     n_history_delay: 28
     n_retrospective_nowcasts: 28
+
+  baselinenowcast_model3:
+    model_path: "./scripts/run_models/functions/baselinenowcast_dow.R"
+    max_delay: 14
+    n_history_delay: 4
+    n_retrospective_nowcasts: 4
 
   bsts:
     training_length: 60
