@@ -45,6 +45,8 @@ training_data <- vroom::vroom(training_data_path)
 #### FIT MODEL 2 ####
 # # # # # # # # # # #
 
+# model 2 in baseline nowcast paper
+
 baselinenowcast_model2_results <- run_scripted_model(wd = wd,
                                               model_name = "baselinenowcast_dow",
                                               training_data = training_data,
@@ -70,6 +72,9 @@ plot_nowcast(
 # # # # # # # # # # #
 #### FIT MODEL 3 ####
 # # # # # # # # # # #
+
+# model 3 in baseline nowcast paper
+# longer training data than model 2
 
 baselinenowcast_model3_results <- run_scripted_model(wd = wd,
                                                   model_name = "baselinenowcast_dow",
