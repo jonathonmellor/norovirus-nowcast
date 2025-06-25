@@ -37,18 +37,18 @@ run_baselinenowcast_dow <- function(.data,
       dplyr::mutate(reference_date = as.Date(reference_date))
 
     rep_tri <- train_df_i |>
-      mutate(delay = as.integer(difftime(report_date,
+      dplyr::mutate(delay = as.integer(difftime(report_date,
                                          reference_date,
                                          units = "days"
       ))
       ) |>
-      select(reference_date, delay, count) |>
-      filter(delay <= max_delay, delay >= 0) |>
-      pivot_wider(
+      dplyr::select(reference_date, delay, count) |>
+      dplyr::filter(delay <= max_delay, delay >= 0) |>
+      tidyr::pivot_wider(
         names_from = delay,
         values_from = count
       ) |>
-      select(-reference_date) |>
+      dplyr::select(-reference_date) |>
       as.matrix()
 
     delay_pmf <- get_delay_estimate(
@@ -72,8 +72,9 @@ run_baselinenowcast_dow <- function(.data,
       trunc_rep_tri_list = trunc_rts,
       structure = c(1, 7)
     )
-    # This is going to throw a bunch of warnings because only the first 15
-    # triangles are actually nowcastable. It will use those 15.
+    # This is going to throw a bunch of warnings because not all
+    # triangles may be nowcastable depending on prediction_end_date.
+    # It will only use those that are nowcastable.
     retro_nowcasts <- generate_pt_nowcast_mat_list(
       reporting_triangle_list = retro_rts,
       n = n_history_delay
@@ -93,32 +94,35 @@ run_baselinenowcast_dow <- function(.data,
 
     date_df <- data.frame(
       reference_date = unique(as.Date(train_df_i$reference_date), 'desc')) |>
-      arrange(reference_date) |>
-      mutate(time = row_number())
+      dplyr::arrange(reference_date) |>
+      dplyr::mutate(time = row_number())
     # Join with the original filtered data
     obs_data <- train_df_i |>
-      group_by(reference_date) |>
-      summarise(data_as_of = sum(count, na.rm = TRUE))
+      dplyr::group_by(reference_date) |>
+      dplyr::summarise(data_as_of = sum(count, na.rm = TRUE))
 
     nowcast_w_data <- nowcast_draws_df |>
-      left_join(date_df, by = "time") |>
-      left_join(obs_data, by = "reference_date")
+      dplyr::left_join(date_df, by = "time") |>
+      dplyr::left_join(obs_data, by = "reference_date")
 
     # Bind together the nowcasts for each weekday
-    all_nowcasts <- bind_rows(all_nowcasts, nowcast_w_data)
+    all_nowcasts <- dplyr::bind_rows(all_nowcasts, nowcast_w_data)
 
   }
 
+
+
   # Order by reference dates
   all_nowcasts <- all_nowcasts |>
-    arrange(reference_date, "desc") |>
+    dplyr::arrange(reference_date, "desc") |>
     # TODO only need last 14 days - do I need to change the fitting for this?
-    filter(reference_date >= as.Date(prediction_end_date) - days(14))
+    dplyr::filter(reference_date >= as.Date(prediction_end_date) - days(14))
 
   obs_with_nowcast_draws_df <- all_nowcasts |>
     dplyr::rename(.value = pred_count,
                   specimen_date = reference_date,
                   .sample = draw,
+                  # "target" here is actually partial data for consistency across model outputs
                   target = data_as_of) |>
     dplyr::select(specimen_date, .sample, target, .value) |>
     dplyr::mutate(model = "baselinenowcast_dow")

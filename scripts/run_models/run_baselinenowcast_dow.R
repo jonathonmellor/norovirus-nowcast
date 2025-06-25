@@ -18,11 +18,6 @@ remotes::install_github(repo = "epinowcast/baselinenowcast")
 remotes::install_github(repo = "epinowcast/epinowcast")
 
 library(ggplot2)
-library(baselinenowcast)
-library(epinowcast)
-library(dplyr)
-library(lubridate)
-library(glue)
 
 # SET GLOBAL SEED for reproducibility
 set.seed(8675309)
