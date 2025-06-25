@@ -51,40 +51,40 @@ run_baselinenowcast_dow <- function(.data,
       dplyr::select(-reference_date) |>
       as.matrix()
 
-    delay_pmf <- get_delay_estimate(
+    delay_pmf <- baselinenowcast::get_delay_estimate(
       reporting_triangle = rep_tri,
       max_delay = max_delay,
       n = n_history_delay
     )
-    pt_nowcast_mat <- apply_delay(
+    pt_nowcast_mat <- baselinenowcast::apply_delay(
       rep_tri_to_nowcast = rep_tri,
       delay_pmf = delay_pmf
     )
 
     # This will throw a warning because not all triangles can be nowcasted, in
     # practince n_retrospective_nowcasts will be less than 28
-    trunc_rts <- truncate_triangles(
+    trunc_rts <- baselinenowcast::truncate_triangles(
       reporting_triangle = rep_tri,
       n = n_retrospective_nowcasts
     )
 
-    retro_rts <- generate_triangles(
+    retro_rts <- baselinenowcast::generate_triangles(
       trunc_rep_tri_list = trunc_rts,
       structure = c(1, 7)
     )
     # This is going to throw a bunch of warnings because not all
     # triangles may be nowcastable depending on prediction_end_date.
     # It will only use those that are nowcastable.
-    retro_nowcasts <- generate_pt_nowcast_mat_list(
+    retro_nowcasts <- baselinenowcast::generate_pt_nowcast_mat_list(
       reporting_triangle_list = retro_rts,
       n = n_history_delay
     )
-    disp_params <- estimate_dispersion(
+    disp_params <- baselinenowcast::estimate_dispersion(
       pt_nowcast_mat_list = retro_nowcasts,
       trunc_rep_tri_list = trunc_rts,
       reporting_triangle_list = retro_rts
     )
-    nowcast_draws_df <- get_nowcast_draws(
+    nowcast_draws_df <- baselinenowcast::get_nowcast_draws(
       point_nowcast_matrix = pt_nowcast_mat,
       reporting_triangle = rep_tri,
       dispersion = disp_params,
@@ -115,24 +115,24 @@ run_baselinenowcast_dow <- function(.data,
   # Order by reference dates
   all_nowcasts <- all_nowcasts |>
     dplyr::arrange(reference_date, "desc") |>
-    # TODO only need last 14 days - do I need to change the fitting for this?
+    # only need last 14 days
     dplyr::filter(reference_date >= as.Date(prediction_end_date) - days(14))
 
   target_data_summarised <- .data |>
-    rename(
+    dplyr::rename(
       reference_date = specimen_date
     ) |>
-    mutate(
+    dplyr::mutate(
       report_date = reference_date + days_to_reported
     ) |>
     epinowcast::enw_filter_report_dates(
       latest_date = as.Date(prediction_end_date) + days(eval_timeframe)
     ) |>
-    group_by(reference_date)|>
-    summarise(target = sum(target, na.rm = TRUE)) |># This is the actual target
-    filter(reference_date <= prediction_end_date) |>
-    arrange(reference_date,'desc') |>
-    mutate(reference_date = as.Date(reference_date))
+    dplyr::group_by(reference_date)|>
+    dplyr::summarise(target = sum(target, na.rm = TRUE)) |># This is the actual target
+    dplyr::filter(reference_date <= prediction_end_date) |>
+    dplyr::arrange(reference_date,'desc') |>
+    dplyr::mutate(reference_date = as.Date(reference_date))
 
   obs_with_nowcast_draws_df <- all_nowcasts |>
     dplyr::left_join(target_data_summarised, by = "reference_date") |>
