@@ -1,5 +1,7 @@
 # script to develop implementation of day-of-week version of
-# `baselinenowcast` model on norovirus case study data.
+# `baselinenowcast` model on norovirus case study data
+
+# fits two day-of-week baseline nowcast models with different hyperparameters
 
 # # # # # # # # # # # #
 ####    SETUP     ####
