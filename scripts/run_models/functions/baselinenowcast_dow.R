@@ -110,8 +110,8 @@ run_baselinenowcast_dow <- function(.data,
   # Order by reference dates
   all_nowcasts <- all_nowcasts |>
     dplyr::arrange(reference_date, "desc") |>
-    # only need last 14 days
-    dplyr::filter(reference_date > as.Date(prediction_end_date) - days(14))
+    # only need 0-14 days delay (total 15 dates)
+    dplyr::filter(reference_date >= as.Date(prediction_end_date) - days(14))
 
   target_data_summarised <- .data |>
     dplyr::rename(
