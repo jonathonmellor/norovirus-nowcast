@@ -49,7 +49,7 @@ training_data <- vroom::vroom(training_data_path)
 # shorter training data than model 3
 
 # Test model
-# TODO this model breaks due to delay pmf estimates being 0 at delay 0 and other low values
+# TODO remove when model is finalised
 nowcast_date <- max_reporting_dates[[1]]
 
 test_results <- run_baselinenowcast_dow(.data = training_data,
@@ -71,7 +71,6 @@ test_results |>
   theme(legend.position = "bottom")
 
 # run for all weeks
-# TODO this model breaks due to delay pmf estimates being 0 at delay 0 and other low values
 baselinenowcast_model2_results <- run_scripted_model(wd = wd,
                                               model_name = "baselinenowcast_dow",
                                               training_data = training_data,
