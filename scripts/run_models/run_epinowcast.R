@@ -5,7 +5,7 @@
 # NOTE: this script is highly computationally intensive and parallalised, optomised for a cloud computing environment
 purrr::walk(
   c(
-    here::here("/scripts/depends.R"),
+    here::here("./scripts/depends.R"),
     here::here("./scripts/run_models/functions", c(
       "epinowcast.R",
       "model_running_functions.R",
@@ -18,7 +18,7 @@ purrr::walk(
 
 
 # SET GLOBAL SEED for reproducibility
-set.seed(8675309)
+set.seed(8675308)
 
 
 # CONFIGURATION ----------------------------------------------------------------------
@@ -44,14 +44,8 @@ if (tuning) {
 }
 
 # LOAD DATA --------------------------------------------------------------------------
-box::use(box / s3)
 
-training_data <- s3$read_using(
-  training_data_path,
-  \(.) vroom::vroom(., show_col_types = FALSE)
-) |>
-  dplyr::mutate(specimen_date = lubridate::ymd(specimen_date)) |>
-  dplyr::select(!filename)
+training_data <- vroom::vroom(training_data_path)
 
 # Prepare data for epinowcast
 
@@ -114,7 +108,7 @@ epinowcast_delay_cdf_pdf <- purrr::map(epinowcast_outputs, "delay_cdf_pdf")
 #  SAVE OUTPUTS --------------------------------------------------------------------
 
 data_output_path <- glue::glue("{output_path}/data")
-dir.create(data_output_path, recursive = TRUE)
+fs::dir_create(data_output_path)
 epinowcast_formatted_scoring <- epinowcast_formatted |>
   # score based on latest data
   dplyr::select(-target_value) |>
@@ -123,9 +117,8 @@ epinowcast_formatted_scoring <- epinowcast_formatted |>
     specimen_date = as.Date(specimen_date, format = "%d/%m/%Y"),
     prediction_end_date = as.Date(prediction_end_date, format = "%d/%m/%Y"))
 
-write.csv(x = epinowcast_formatted_scoring,
-  file = glue::glue("{data_output_path}/epinowcast_predictions_summary.csv"),
-  row.names = FALSE)
+readr::write_csv(x = epinowcast_formatted_scoring,
+  file = glue::glue("{data_output_path}/epinowcast_predictions_summary.csv"))
 
 
 # PLOTTING -------------------------------------------------------------------------
@@ -155,20 +148,4 @@ plot_nowcast(
 
 
 # SCORING --------------------------------------------------------------------------
-
-print("Now scoring models")
-
-scoring_output_path <- fs::dir_create(fs::path(output_path, "scoring"))
-
-# Aggregate data by specimen_date for scoring
-latest_data <- training_data |>
-  dplyr::group_by(specimen_date) |>
-  dplyr::summarise(target_value = sum(target, na.rm = TRUE),
-    .groups = "drop")
-
-epinowcast_formatted_scoring <- merge(epinowcast_formatted_scoring, latest_data, by = "specimen_date", all.x = TRUE)
-
-score(data = epinowcast_formatted_scoring |> dplyr::filter(t_aggregation == "daily"),
-  add_log = FALSE,
-  output_path = scoring_output_path,
-  model_name = "epinowcast")
+# NOTE: scoring removed for this analysis

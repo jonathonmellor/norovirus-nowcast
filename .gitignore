@@ -1,0 +1,6 @@
+# We do want to share data through this repository,
+# so need to follow other practices than usual.
+
+./outputs/*
+!./outputs/**/data/*
+*.png

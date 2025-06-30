@@ -7,7 +7,7 @@
 wd <- system("echo $(git rev-parse --show-toplevel)/", intern = TRUE)
 source(paste0(wd, "./scripts/depends.R"))
 source(paste0(wd, "./scripts/run_models/functions/plotting.R"))
-output_path <- paste0(wd, "./outputs/combined/")
+output_path <- paste0(wd, "outputs/combined/")
 config <- yaml::read_yaml(paste0(wd, "./scripts/run_models/norovirus_nowcast_config.yaml"))
 model_data_path <- "./outputs/data/"
 
@@ -15,8 +15,6 @@ training_data_path <- "./outputs/data/cases_with_noise.csv"
 
 prediction_filenames <- c(
   "gam_predictions_summary.csv",
-  "bsts_predictions_summary.csv",
-  "bsts_111_online_predictions_summary.csv",
   "epinowcast_predictions_summary.csv",
   "baseline_prevweek_predictions_summary.csv"
 )
@@ -32,9 +30,8 @@ predictions <- tibble::tibble(
     prediction_path = paste0(model_data_path, prediction_filename),
     predictions = purrr::map(
       .x = prediction_path,
-      .f = ~ aws.s3::s3read_using(
-        vroom::vroom,
-        object = .x)
+      .f = ~
+        vroom::vroom(.x)
     )
   ) |>
   dplyr::pull(predictions) |>
@@ -49,11 +46,7 @@ predictions <- tibble::tibble(
 
 
 # load training data
-training_data <- aws.s3::s3read_using(
-  vroom::vroom,
-  object = training_data_path,
-  show_col_types = FALSE
-) |>
+training_data <- vroom::vroom(training_data_path) |>
   dplyr::mutate(specimen_date = lubridate::ymd(specimen_date))
 
 training_data_daily <- training_data |>
