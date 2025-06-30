@@ -61,7 +61,7 @@ training_data <- vroom::vroom(training_data_path)
 
 
 
-baselinenowcast_results <- run_scripted_model(wd = wd,
+baselinenowcast_model1_results <- run_scripted_model(wd = wd,
                                               model_name = "baselinenowcast",
                                               training_data = training_data,
                                               prediction_end_dates = max_reporting_dates,
@@ -69,9 +69,10 @@ baselinenowcast_results <- run_scripted_model(wd = wd,
                                               output_columns = config$output_columns,
                                               model_hyperparams = config$hyperparams$baselinenowcast,
                                               n_pi_samples = 1000) |>
-  purrr::list_rbind()
+  purrr::list_rbind()|>
+  dplyr::mutate(model = "baselinenowcast_model1")
 
-baselinenowcast_formatted <- baselinenowcast_results
+baselinenowcast_formatted <- baselinenowcast_model1_results
 
 plotting_output_path <- fs::dir_create(fs::path(output_path, "plots"))
 
@@ -85,3 +86,16 @@ plot_nowcast(
   y_limit = 150,
   x_limit_upper = NA,
   x_limit_lower = "2023-10-02")
+
+
+# # # # # # # # # # # # #
+####  SAVE OUTPUTS  ####
+# # # # # # # # # # # # #
+
+data_output_path <- glue::glue("{output_path}/data")
+fs::dir_create(data_output_path)
+
+
+readr::write_csv(
+  x = baselinenowcast_formatted,
+  file = glue::glue("{data_output_path}/baselinenowcast_model1_predictions_summary.csv"))

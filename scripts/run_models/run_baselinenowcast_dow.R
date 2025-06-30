@@ -100,3 +100,14 @@ plot_nowcast(
   y_limit = 150,
   x_limit_upper = NA,
   x_limit_lower = "2023-10-02")
+
+
+
+readr::write_csv(
+  x = baselinenowcast_model2_results,
+  file = glue::glue("{data_output_path}/baselinenowcast_model2_predictions_summary.csv"))
+
+
+readr::write_csv(
+  x = baselinenowcast_model3_results,
+  file = glue::glue("{data_output_path}/baselinenowcast_model3_predictions_summary.csv"))

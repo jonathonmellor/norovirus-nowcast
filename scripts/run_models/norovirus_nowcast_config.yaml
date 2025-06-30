@@ -40,33 +40,6 @@ hyperparams:
     n_history_delay: 28
     n_retrospective_nowcasts: 28
 
-  bsts:
-    training_length: 60
-    level:
-      sigma.guess: 0.001
-      upper.limit: 0.09531018
-    slope:
-      sigma.guess: 0.001
-      upper.limit: 0.09531018
-    seasonality: 7
-    niter: 50000
-    horizon: 7
-    burnin: 2000
-
-  bsts_111:
-    training_length: 150
-    level:
-      sigma.guess: 0.001
-      upper.limit: 0.009950331
-    slope:
-      sigma.guess: 0.001
-      upper.limit: 0.09531018
-    seasonality: 7
-    niter: 50000
-    horizon: 7
-    burnin: 2000
-    model.size: 5
-
   epinowcast:
     model_path: "./scripts/run_models/functions/epinowcast.R"
     training_length: 35
