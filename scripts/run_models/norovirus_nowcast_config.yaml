@@ -26,6 +26,7 @@ hyperparams:
     max_delay: 14
     n_history_delay: 28
     n_retrospective_nowcasts: 28
+    eval_timeframe: 50
 
   baselinenowcast_model2:
     model_path: "./scripts/run_models/functions/baselinenowcast_dow.R"
