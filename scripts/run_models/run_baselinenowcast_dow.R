@@ -48,27 +48,7 @@ training_data <- vroom::vroom(training_data_path)
 # model 2 in baseline nowcast paper
 # shorter training data than model 3
 
-# Test model
-# TODO remove when model is finalised
-nowcast_date <- max_reporting_dates[[1]]
 
-test_results <- run_baselinenowcast_dow(.data = training_data,
-                                        prediction_end_date = nowcast_date,
-                                        n_pi_samples = 100,
-                                        model_hyperparams = config$hyperparams$baselinenowcast_model2)
-test_results
-
-test_results |>
-  ggplot() +
-  geom_point(aes(x=specimen_date, y=target)) +
-  geom_ribbon(aes(x=specimen_date, ymax=pi_95, ymin=pi_5, alpha="90%")) +
-  geom_ribbon(aes(x=specimen_date, ymax=pi_75, ymin=pi_25, alpha="50%")) +
-  scale_alpha_manual(values = c("90%"=0.3,
-                                "50%" = 0.5)) +
-  scale_y_continuous(trans = "sqrt") +
-  xlab("Reference date") +
-  ylab("cases") +
-  theme(legend.position = "bottom")
 
 # run for all weeks
 baselinenowcast_model2_results <- run_scripted_model(wd = wd,
