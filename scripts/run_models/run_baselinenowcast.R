@@ -58,28 +58,10 @@ training_data <- vroom::vroom(training_data_path)
 
 
 # Run model
-nowcast_date <- max_reporting_dates[[1]]
-
-test_results <- run_baselinenowcast(.data = training_data,
-                    prediction_end_date = nowcast_date,
-                    n_pi_samples = 100,
-                    model_hyperparams = config$hyperparams$baselinenowcast)
-test_results
-
-test_results |>
-  ggplot() +
-  geom_point(aes(x=specimen_date, y=target)) +
-  geom_ribbon(aes(x=specimen_date, ymax=pi_95, ymin=pi_5, alpha="90%")) +
-  geom_ribbon(aes(x=specimen_date, ymax=pi_75, ymin=pi_25, alpha="50%")) +
-  scale_alpha_manual(values = c("90%"=0.3,
-                                "50%" = 0.5)) +
-  scale_y_continuous(trans = "sqrt") +
-  xlab("Reference date") +
-  ylab("cases") +
-  theme(legend.position = "bottom")
 
 
-baselinenowcast_results <- run_scripted_model(wd = wd,
+
+baselinenowcast_model1_results <- run_scripted_model(wd = wd,
                                               model_name = "baselinenowcast",
                                               training_data = training_data,
                                               prediction_end_dates = max_reporting_dates,
@@ -87,9 +69,10 @@ baselinenowcast_results <- run_scripted_model(wd = wd,
                                               output_columns = config$output_columns,
                                               model_hyperparams = config$hyperparams$baselinenowcast,
                                               n_pi_samples = 1000) |>
-  purrr::list_rbind()
+  purrr::list_rbind()|>
+  dplyr::mutate(model = "baselinenowcast_model1")
 
-baselinenowcast_formatted <- baselinenowcast_results
+baselinenowcast_formatted <- baselinenowcast_model1_results
 
 plotting_output_path <- fs::dir_create(fs::path(output_path, "plots"))
 
@@ -103,3 +86,16 @@ plot_nowcast(
   y_limit = 150,
   x_limit_upper = NA,
   x_limit_lower = "2023-10-02")
+
+
+# # # # # # # # # # # # #
+####  SAVE OUTPUTS  ####
+# # # # # # # # # # # # #
+
+data_output_path <- glue::glue("{output_path}/data")
+fs::dir_create(data_output_path)
+
+
+readr::write_csv(
+  x = baselinenowcast_formatted,
+  file = glue::glue("{data_output_path}/baselinenowcast_model1_predictions_summary.csv"))
